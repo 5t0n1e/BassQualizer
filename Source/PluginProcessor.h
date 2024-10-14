@@ -104,7 +104,8 @@ private:
     static void updateCoefficients(Coefficients &old, const Coefficients &replacements);
 
     template<typename ChainType, typename CoefficientType>
-    void updateCutFilter(ChainType &chain, const CoefficientType &cutCoefficients, Slope &cutSlope) {
+
+    void updateCutFilter(ChainType &chain, const CoefficientType &cutCoefficients, Slope cutSlope) {
         chain.template setBypassed<0>(true);
         chain.template setBypassed<1>(true);
         chain.template setBypassed<2>(true);
@@ -144,6 +145,9 @@ private:
         }
     }
 
+    void updateFilters();
+    void updateLowCutFilter(const ChainSettings &chainSettings);
+    void updateHighCutFilter(const ChainSettings &chainSettings);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BassQualizerAudioProcessor)
 };

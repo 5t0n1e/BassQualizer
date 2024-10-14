@@ -91,30 +91,8 @@ void BassQualizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
-    auto chainSettings = getChainSettings(apvts);
 
-    // Peak
-    updatePeakFilter(chainSettings);
-
-    // Low Cut
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
-        chainSettings.lowCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.lowCutSlope + 1));
-    auto &leftLowCut = leftChain.get<ChainPositions::lowCut>();
-    auto &rightLowCut = rightChain.get<ChainPositions::lowCut>();
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
-
-    // High Cut
-    auto cutCoefficientsHigh = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
-        chainSettings.highCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.highCutSlope + 1));
-    auto &leftHighCut = leftChain.get<ChainPositions::highCut>();
-    auto &rightHighCut = rightChain.get<ChainPositions::highCut>();
-    updateCutFilter(leftHighCut, cutCoefficientsHigh, chainSettings.highCutSlope);
-    updateCutFilter(rightLowCut, cutCoefficientsHigh, chainSettings.highCutSlope);
+    updateFilters();
 }
 
 void BassQualizerAudioProcessor::releaseResources() {
@@ -161,30 +139,7 @@ void BassQualizerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    auto chainSettings = getChainSettings(apvts);
-
-    // Peak
-    updatePeakFilter(chainSettings);
-
-    // Low Cut
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
-        chainSettings.lowCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.lowCutSlope + 1));
-    auto &leftLowCut = leftChain.get<ChainPositions::lowCut>();
-    auto &rightLowCut = rightChain.get<ChainPositions::lowCut>();
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
-
-    // High Cut
-    auto cutCoefficientsHigh = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
-        chainSettings.highCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.highCutSlope + 1));
-    auto &leftHighCut = leftChain.get<ChainPositions::highCut>();
-    auto &rightHighCut = rightChain.get<ChainPositions::highCut>();
-    updateCutFilter(leftHighCut, cutCoefficientsHigh, chainSettings.highCutSlope);
-    updateCutFilter(rightHighCut, cutCoefficientsHigh, chainSettings.highCutSlope);
+    updateFilters();
 
     juce::dsp::AudioBlock<float> block(buffer);
 
@@ -246,6 +201,36 @@ void BassQualizerAudioProcessor::updatePeakFilter(const ChainSettings &chainSett
 
 void BassQualizerAudioProcessor::updateCoefficients(Coefficients &old, const Coefficients &replacements) {
     *old = *replacements;
+}
+
+void BassQualizerAudioProcessor::updateLowCutFilter(const ChainSettings &chainSettings) {
+    // Low Cut
+    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+        chainSettings.lowCutFreq,
+        getSampleRate(),
+        2 * (chainSettings.lowCutSlope + 1));
+    auto &leftLowCut = leftChain.get<ChainPositions::lowCut>();
+    auto &rightLowCut = rightChain.get<ChainPositions::lowCut>();
+    updateCutFilter(leftLowCut, lowCutCoefficients, chainSettings.highCutSlope);
+    updateCutFilter(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
+}
+
+void BassQualizerAudioProcessor::updateHighCutFilter(const ChainSettings &chainSettings) {
+    auto highCutCoefficientsHigh = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
+        chainSettings.highCutFreq,
+        getSampleRate(),
+        2 * (chainSettings.highCutSlope + 1));
+    auto &leftHighCut = leftChain.get<ChainPositions::highCut>();
+    auto &rightHighCut = rightChain.get<ChainPositions::highCut>();
+    updateCutFilter(leftHighCut, highCutCoefficientsHigh, chainSettings.highCutSlope);
+    updateCutFilter(rightHighCut, highCutCoefficientsHigh, chainSettings.highCutSlope);
+}
+
+void BassQualizerAudioProcessor::updateFilters() {
+    auto chainSettings = getChainSettings(apvts);
+    updatePeakFilter(chainSettings);
+    updateLowCutFilter(chainSettings);
+    updateHighCutFilter(chainSettings);
 }
 
 
