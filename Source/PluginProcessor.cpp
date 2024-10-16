@@ -199,17 +199,22 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts) {
     return settings;
 }
 
-void BassQualizerAudioProcessor::updatePeakFilter(const ChainSettings &chainSettings) {
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(),
+Coefficients makePeakFilter(const ChainSettings &chainSettings, double sampleRate) 
+{
+    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate,
         chainSettings.peakFreq,
         chainSettings.peakQuality,
         juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+}
+
+void BassQualizerAudioProcessor::updatePeakFilter(const ChainSettings &chainSettings) {
+    auto peakCoefficients = makePeakFilter(chainSettings, getSampleRate());
 
     updateCoefficients(leftChain.get<ChainPositions::peak>().coefficients, *peakCoefficients);
     updateCoefficients(rightChain.get<ChainPositions::peak>().coefficients, *peakCoefficients);
 }
 
-void BassQualizerAudioProcessor::updateCoefficients(Coefficients &old, const Coefficients &replacements) {
+void /* BassQualizerAudioProcessor*/::updateCoefficients(Coefficients &old, const Coefficients &replacements) {
     *old = *replacements;
 }
 
