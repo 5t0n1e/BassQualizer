@@ -27,11 +27,25 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
     }
+
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->addListener(this);
+    }
+
+    startTimerHz(60);
+
     setSize (600, 400);
 }
 
 BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -146,21 +160,14 @@ void BassQualizerAudioProcessorEditor::timerCallback()
 {
     if(parametersChanged.compareAndSetBool(false, true))
     {
-       /* monoChain.setBypassed<ChainPositions::lowCut>(audioProcessor.apvts.getRawParameterValue("lowCutBypass")->load() > 0.5);
-        monoChain.setBypassed<ChainPositions::peak>(audioProcessor.apvts.getRawParameterValue("peakBypass")->load() > 0.5);
-        monoChain.setBypassed<ChainPositions::highCut>(audioProcessor.apvts.getRawParameterValue("highCutBypass")->load() > 0.5);
-
-        auto peakCoefficients = makePeakFilter(audioProcessor.apvts);
+        // update the mono chain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
         updateCoefficients(monoChain.get<ChainPositions::peak>().coefficients, peakCoefficients);
 
-        auto lowCutCoefficients = makeLowCutFilter(audioProcessor.apvts);
-        auto highCutCoefficients = makeHighCutFilter(audioProcessor.apvts);
-
-        updateCutFilter(monoChain.get<ChainPositions::lowCut>(), lowCutCoefficients, Slope{audioProcessor.apvts.getRawParameterValue("lowCutSlope")->load()});
-        updateCutFilter(monoChain.get<ChainPositions::highCut>(), highCutCoefficients, Slope{audioProcessor.apvts.getRawParameterValue("highCutSlope")->load()});
-
+        // signal a repaint
         repaint();
-        */
+        
     }
 }
 

@@ -220,10 +220,7 @@ void /* BassQualizerAudioProcessor*/::updateCoefficients(Coefficients &old, cons
 
 void BassQualizerAudioProcessor::updateLowCutFilter(const ChainSettings &chainSettings) {
     // Low Cut
-    auto lowCutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
-        chainSettings.lowCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.lowCutSlope + 1));
+    auto lowCutCoefficients = makeLowCutFilter(chainSettings, getSampleRate());
     auto &leftLowCut = leftChain.get<ChainPositions::lowCut>();
     auto &rightLowCut = rightChain.get<ChainPositions::lowCut>();
     updateCutFilter(leftLowCut, lowCutCoefficients, chainSettings.highCutSlope);
@@ -231,10 +228,7 @@ void BassQualizerAudioProcessor::updateLowCutFilter(const ChainSettings &chainSe
 }
 
 void BassQualizerAudioProcessor::updateHighCutFilter(const ChainSettings &chainSettings) {
-    auto highCutCoefficientsHigh = juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(
-        chainSettings.highCutFreq,
-        getSampleRate(),
-        2 * (chainSettings.highCutSlope + 1));
+    auto highCutCoefficientsHigh = makeHighCutFilter(chainSettings, getSampleRate());
     auto &leftHighCut = leftChain.get<ChainPositions::highCut>();
     auto &rightHighCut = rightChain.get<ChainPositions::highCut>();
     updateCutFilter(leftHighCut, highCutCoefficientsHigh, chainSettings.highCutSlope);
