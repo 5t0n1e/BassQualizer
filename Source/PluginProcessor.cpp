@@ -214,7 +214,7 @@ void BassQualizerAudioProcessor::updatePeakFilter(const ChainSettings &chainSett
     updateCoefficients(rightChain.get<ChainPositions::peak>().coefficients, *peakCoefficients);
 }
 
-void /* BassQualizerAudioProcessor*/::updateCoefficients(Coefficients &old, const Coefficients &replacements) {
+void /* BassQualizerAudioProcessor*/updateCoefficients(Coefficients &old, const Coefficients &replacements) {
     *old = *replacements;
 }
 
