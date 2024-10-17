@@ -9,25 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//==============================================================================
-BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizerAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p),
-    peakFreqSliderAttachment(audioProcessor.apvts, "peakFreq", peakFreqSlider),
-    peakGainSliderAttachment(audioProcessor.apvts, "peakGainInDb", peakGainSlider),
-    peakqualitySliderAttachment(audioProcessor.apvts, "peakQuality", peakqualitySlider),
-    lowcutFreqSliderAttachment(audioProcessor.apvts, "lowCutFreq", lowcutFreqSlider),
-    highcutFreqSliderAttachment(audioProcessor.apvts, "highCutFreq", highcutFreqSlider),
-    lowcutSlopeSliderAttachment(audioProcessor.apvts, "lowCutSlope", lowcutSlopeSlider),
-    highcutSlopeSliderAttachment(audioProcessor.apvts, "highCutSlope", highcutSlopeSlider)
-
+ResponseCurveComponent::ResponseCurveComponent(BassQualizerAudioProcessor& p) : audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-
-    for( auto* comp : getComps()){
-        addAndMakeVisible(comp);
-    }
-
     const auto& params = audioProcessor.getParameters();
     for (auto param : params)
     {
@@ -35,11 +18,9 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     }
 
     startTimerHz(60);
-
-    setSize (600, 400);
 }
 
-BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
+ResponseCurveComponent::~ResponseCurveComponent()
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param : params)
@@ -48,15 +29,40 @@ BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
     }
 }
 
-//==============================================================================
-void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
+
+void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    if(parametersChanged.compareAndSetBool(false, true))
+    {
+        DBG("Params changed");
+        // update the mono chain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::peak>().coefficients, peakCoefficients);
+
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+
+        updateCutFilter(monoChain.get<ChainPositions::lowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+        updateCutFilter(monoChain.get<ChainPositions::highCut>(), highCutCoefficients, chainSettings.highCutSlope);
+        // signal a repaint
+        repaint();
+        
+    }
+}
+
+void ResponseCurveComponent::paint (juce::Graphics& g)
 {
     using namespace juce;
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (Colours::black);
 
-    auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+    auto responseArea = getLocalBounds();
 
     auto w = responseArea.getWidth();
 
@@ -129,6 +135,42 @@ void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
 
 }
 
+
+//==============================================================================
+BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizerAudioProcessor& p)
+    : AudioProcessorEditor (&p), audioProcessor (p),
+    responseCurveComponent(audioProcessor),
+    peakFreqSliderAttachment(audioProcessor.apvts, "peakFreq", peakFreqSlider),
+    peakGainSliderAttachment(audioProcessor.apvts, "peakGainInDb", peakGainSlider),
+    peakqualitySliderAttachment(audioProcessor.apvts, "peakQuality", peakqualitySlider),
+    lowcutFreqSliderAttachment(audioProcessor.apvts, "lowCutFreq", lowcutFreqSlider),
+    highcutFreqSliderAttachment(audioProcessor.apvts, "highCutFreq", highcutFreqSlider),
+    lowcutSlopeSliderAttachment(audioProcessor.apvts, "lowCutSlope", lowcutSlopeSlider),
+    highcutSlopeSliderAttachment(audioProcessor.apvts, "highCutSlope", highcutSlopeSlider)
+    
+
+{
+    // Make sure that before the constructor has finished, you've set the
+    // editor's size to whatever you need it to be.
+
+    for( auto* comp : getComps()){
+        addAndMakeVisible(comp);
+    }
+
+    setSize (600, 400);
+}
+
+BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
+{
+}
+
+//==============================================================================
+void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
+{
+    using namespace juce;
+    g.fillAll (juce::Colours::black);
+}
+
 void BassQualizerAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
@@ -136,6 +178,8 @@ void BassQualizerAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds();
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+
+    responseCurveComponent.setBounds(responseArea);
 
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
@@ -151,27 +195,19 @@ void BassQualizerAudioProcessorEditor::resized()
     peakqualitySlider.setBounds(bounds);
 }
 
-void BassQualizerAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
-    parametersChanged.set(true);
-}
-
-void BassQualizerAudioProcessorEditor::timerCallback()
-{
-    if(parametersChanged.compareAndSetBool(false, true))
-    {
-        // update the mono chain
-        auto chainSettings = getChainSettings(audioProcessor.apvts);
-        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCoefficients(monoChain.get<ChainPositions::peak>().coefficients, peakCoefficients);
-
-        // signal a repaint
-        repaint();
-        
-    }
-}
 
 std::vector<juce::Component*> BassQualizerAudioProcessorEditor::getComps()
 {
-    return {&peakFreqSlider, &peakGainSlider, &peakqualitySlider, &lowcutFreqSlider, &highcutFreqSlider, &lowcutSlopeSlider, &highcutSlopeSlider};
+    return 
+    {
+        &peakFreqSlider,
+        &peakGainSlider,
+        &peakqualitySlider,
+        &lowcutFreqSlider,
+        &highcutFreqSlider,
+        &lowcutSlopeSlider,
+        &highcutSlopeSlider,
+        &responseCurveComponent
+    };
 }
+
