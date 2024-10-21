@@ -81,6 +81,12 @@ private:
             lowcutSlopeSliderAttachment,
             highcutSlopeSliderAttachment;
 
+    juce::ToggleButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+
+    using ButtonAttachment = APVTS::ButtonAttachment;
+
+    ButtonAttachment lowcutBypassButtonAttachment, peakBypassButtonAttachment, highcutBypassButtonAttachment;
+
     myLookAndFeelV1 lookAndFeelV1; // Create instances of your custom look and feel classes
     myLookAndFeelV3 lookAndFeelV3;
 
