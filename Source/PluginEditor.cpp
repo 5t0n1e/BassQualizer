@@ -150,8 +150,13 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     
 
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    peakFreqSlider.setLookAndFeel(&lookAndFeelV1);
+    peakGainSlider.setLookAndFeel(&lookAndFeelV3);
+    peakqualitySlider.setLookAndFeel(&lookAndFeelV3);
+    lowcutFreqSlider.setLookAndFeel(&lookAndFeelV1);
+    highcutFreqSlider.setLookAndFeel(&lookAndFeelV1);
+    lowcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
+    highcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
 
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
@@ -162,6 +167,13 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
 
 BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
 {
+    peakFreqSlider.setLookAndFeel(nullptr);
+    peakGainSlider.setLookAndFeel(nullptr);
+    peakqualitySlider.setLookAndFeel(nullptr);
+    lowcutFreqSlider.setLookAndFeel(nullptr);
+    highcutFreqSlider.setLookAndFeel(nullptr);
+    lowcutSlopeSlider.setLookAndFeel(nullptr);
+    highcutSlopeSlider.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
