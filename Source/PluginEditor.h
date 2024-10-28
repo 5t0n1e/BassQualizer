@@ -89,6 +89,7 @@ private:
 
     myLookAndFeelV1 lookAndFeelV1; // Create instances of your custom look and feel classes
     myLookAndFeelV3 lookAndFeelV3;
+    
 
     std::vector<juce::Component *> getComps();
 

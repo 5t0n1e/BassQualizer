@@ -169,6 +169,10 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     lowcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
     highcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
 
+    lowcutBypassButton.setLookAndFeel(&lookAndFeelV1);
+    peakBypassButton.setLookAndFeel(&lookAndFeelV1);
+    highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
+
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
     }
@@ -185,6 +189,10 @@ BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
     highcutFreqSlider.setLookAndFeel(nullptr);
     lowcutSlopeSlider.setLookAndFeel(nullptr);
     highcutSlopeSlider.setLookAndFeel(nullptr);
+
+    lowcutBypassButton.setLookAndFeel(nullptr);
+    peakBypassButton.setLookAndFeel(nullptr);
+    highcutBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
