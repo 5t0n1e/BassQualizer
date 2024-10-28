@@ -102,7 +102,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
                 mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         }
-        if (!monoChain.isBypassed<ChainPositions::lowCut>())
+        if (!monoChain.isBypassed<ChainPositions::highCut>())
         {
             if(!highcut.isBypassed<0>())
                 mag *= highcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
