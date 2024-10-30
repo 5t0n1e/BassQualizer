@@ -87,6 +87,22 @@ private:
 
     ButtonAttachment lowcutBypassButtonAttachment, peakBypassButtonAttachment, highcutBypassButtonAttachment;
 
+    // Reverb sliders
+    juce::Slider reverbRoomSizeSlider;
+    juce::Slider reverbDampingSlider;
+    juce::Slider reverbWetLevelSlider;
+    juce::Slider reverbDryLevelSlider;
+    juce::Slider reverbWidthSlider;
+    juce::ToggleButton reverbFreezeModeButton;
+
+    // Attachments
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbRoomSizeAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampingAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWetLevelAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDryLevelAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbFreezeModeAttachment;
+
     myLookAndFeelV1 lookAndFeelV1; // Create instances of your custom look and feel classes
     myLookAndFeelV3 lookAndFeelV3;
     

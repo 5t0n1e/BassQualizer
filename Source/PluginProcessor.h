@@ -24,6 +24,13 @@ struct ChainSettings {
     Slope lowCutSlope{Slope::Slope_12}, highCutSlope{Slope::Slope_12};
 
     bool lowCutBypassed{false}, peakBypassed{false}, highCutBypassed{false};
+    // Reverb parameters
+    float reverbRoomSize{0.5f};
+    float reverbDamping{0.5f};
+    float reverbWetLevel{0.33f};
+    float reverbDryLevel{0.4f};
+    float reverbWidth{1.0f};
+    bool reverbFreezeMode{false};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts);
@@ -155,6 +162,8 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+
+    juce::dsp::Reverb reverb;
 
     juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameters()};
 

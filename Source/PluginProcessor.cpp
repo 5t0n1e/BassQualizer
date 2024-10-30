@@ -89,6 +89,7 @@ void BassQualizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     spec.numChannels = 1;
     spec.sampleRate = sampleRate;
 
+    reverb.prepare(spec);
     leftChain.prepare(spec);
     rightChain.prepare(spec);
 
@@ -148,6 +149,10 @@ void BassQualizerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
 
     juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    juce::dsp::ProcessContextReplacing<float> context(block);
+
+    reverb.process(context);
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
@@ -250,6 +255,17 @@ void BassQualizerAudioProcessor::updateHighCutFilter(const ChainSettings &chainS
 
 void BassQualizerAudioProcessor::updateFilters() {
     auto chainSettings = getChainSettings(apvts);
+
+    juce::dsp::Reverb::Parameters reverbParams;
+    reverbParams.roomSize = chainSettings.reverbRoomSize;
+    reverbParams.damping = chainSettings.reverbDamping;
+    reverbParams.wetLevel = chainSettings.reverbWetLevel;
+    reverbParams.dryLevel = chainSettings.reverbDryLevel;
+    reverbParams.width = chainSettings.reverbWidth;
+    reverbParams.freezeMode = chainSettings.reverbFreezeMode;
+
+    reverb.setParameters(reverbParams);
+
     updatePeakFilter(chainSettings);
     updateLowCutFilter(chainSettings);
     updateHighCutFilter(chainSettings);
@@ -258,6 +274,14 @@ void BassQualizerAudioProcessor::updateFilters() {
 
 juce::AudioProcessorValueTreeState::ParameterLayout BassQualizerAudioProcessor::createParameters() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "Room Size", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDamping", "Damping", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetLevel", "Wet Level", 0.0f, 1.0f, 0.33f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDryLevel", "Dry Level", 0.0f, 1.0f, 0.4f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWidth", "Width", 0.0f, 1.0f, 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterBool>("reverbFreezeMode", "Freeze Mode", false));
+
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("lowCutFreq", "Low Cut Freq",
                                                            juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 0.25f),
