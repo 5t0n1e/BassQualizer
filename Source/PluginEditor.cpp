@@ -158,7 +158,8 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     highcutSlopeSliderAttachment(audioProcessor.apvts, "highCutSlope", highcutSlopeSlider),
     lowcutBypassButtonAttachment(audioProcessor.apvts, "lowCutBypass", lowcutBypassButton),
     peakBypassButtonAttachment(audioProcessor.apvts, "peakBypass", peakBypassButton),
-    highcutBypassButtonAttachment(audioProcessor.apvts, "highCutBypass", highcutBypassButton)
+    highcutBypassButtonAttachment(audioProcessor.apvts, "highCutBypass", highcutBypassButton),
+    reverbBypassButtonAttachment(audioProcessor.apvts, "reverbBypass", reverbBypassButton)
 
 {
     peakFreqSlider.setLookAndFeel(&lookAndFeelV1);
@@ -172,6 +173,8 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     lowcutBypassButton.setLookAndFeel(&lookAndFeelV1);
     peakBypassButton.setLookAndFeel(&lookAndFeelV1);
     highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
+
+    reverbBypassButton.setLookAndFeel(&lookAndFeelV1);
 
         // Reverb Room Size
     reverbRoomSizeSlider.setSliderStyle(juce::Slider::LinearHorizontal);
@@ -211,7 +214,7 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
         addAndMakeVisible(comp);
     }
 
-    setSize (600, 400);
+    setSize (1920, 1080);
 }
 
 BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
@@ -227,6 +230,8 @@ BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
     lowcutBypassButton.setLookAndFeel(nullptr);
     peakBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
+
+    reverbBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -270,6 +275,7 @@ void BassQualizerAudioProcessorEditor::resized()
     reverbDryLevelSlider.setBounds(reverbArea.removeFromTop(50));
     reverbWidthSlider.setBounds(reverbArea.removeFromTop(50));
     reverbFreezeModeButton.setBounds(reverbArea.removeFromTop(50));
+    reverbBypassButton.setBounds(reverbArea.removeFromTop(25));
 }
 
 
@@ -287,7 +293,8 @@ std::vector<juce::Component*> BassQualizerAudioProcessorEditor::getComps()
         &responseCurveComponent,
         &lowcutBypassButton,
         &peakBypassButton,
-        &highcutBypassButton
+        &highcutBypassButton,
+        &reverbBypassButton
     };
 }
 

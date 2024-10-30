@@ -103,6 +103,10 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbFreezeModeAttachment;
 
+    // PluginEditor.h
+    juce::ToggleButton reverbBypassButton;
+    ButtonAttachment reverbBypassButtonAttachment;
+
     myLookAndFeelV1 lookAndFeelV1; // Create instances of your custom look and feel classes
     myLookAndFeelV3 lookAndFeelV3;
     

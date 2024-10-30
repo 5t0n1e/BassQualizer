@@ -152,7 +152,8 @@ void BassQualizerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
 
     juce::dsp::ProcessContextReplacing<float> context(block);
 
-    reverb.process(context);
+    reverb.process(leftContext);
+    reverb.process(rightContext);
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
@@ -265,6 +266,7 @@ void BassQualizerAudioProcessor::updateFilters() {
     reverbParams.freezeMode = chainSettings.reverbFreezeMode;
 
     reverb.setParameters(reverbParams);
+    reverb.setEnabled(chainSettings.reverbBypassed);
 
     updatePeakFilter(chainSettings);
     updateLowCutFilter(chainSettings);
@@ -274,14 +276,6 @@ void BassQualizerAudioProcessor::updateFilters() {
 
 juce::AudioProcessorValueTreeState::ParameterLayout BassQualizerAudioProcessor::createParameters() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-
-    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "Room Size", 0.0f, 1.0f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDamping", "Damping", 0.0f, 1.0f, 0.5f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetLevel", "Wet Level", 0.0f, 1.0f, 0.33f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDryLevel", "Dry Level", 0.0f, 1.0f, 0.4f));
-    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWidth", "Width", 0.0f, 1.0f, 1.0f));
-    layout.add(std::make_unique<juce::AudioParameterBool>("reverbFreezeMode", "Freeze Mode", false));
-
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("lowCutFreq", "Low Cut Freq",
                                                            juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 0.25f),
@@ -309,6 +303,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout BassQualizerAudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterBool>("lowCutBypass", "Low Cut Bypass", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("peakBypass", "Peak Bypass", false));
     layout.add(std::make_unique<juce::AudioParameterBool>("highCutBypass", "High Cut Bypass", false));
+
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "Room Size", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDamping", "Damping", 0.0f, 1.0f, 0.5f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWetLevel", "Wet Level", 0.0f, 1.0f, 0.33f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbDryLevel", "Dry Level", 0.0f, 1.0f, 0.4f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("reverbWidth", "Width", 0.0f, 1.0f, 1.0f));
+    layout.add(std::make_unique<juce::AudioParameterBool>("reverbFreezeMode", "Freeze Mode", false));
+
+    layout.add(std::make_unique<juce::AudioParameterBool>("reverbBypass", "Reverb Bypass", true));
 
     return layout;
 }

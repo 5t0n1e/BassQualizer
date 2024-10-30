@@ -23,7 +23,7 @@ struct ChainSettings {
 
     Slope lowCutSlope{Slope::Slope_12}, highCutSlope{Slope::Slope_12};
 
-    bool lowCutBypassed{false}, peakBypassed{false}, highCutBypassed{false};
+    bool lowCutBypassed{false}, peakBypassed{false}, highCutBypassed{false}, reverbBypassed{true};
     // Reverb parameters
     float reverbRoomSize{0.5f};
     float reverbDamping{0.5f};
@@ -175,6 +175,7 @@ private:
     void updateFilters();
     void updateLowCutFilter(const ChainSettings &chainSettings);
     void updateHighCutFilter(const ChainSettings &chainSettings);
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BassQualizerAudioProcessor)
 };
