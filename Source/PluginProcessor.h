@@ -175,7 +175,7 @@ private:
     void updateFilters();
     void updateLowCutFilter(const ChainSettings &chainSettings);
     void updateHighCutFilter(const ChainSettings &chainSettings);
-
+    void updateReverbFilter(const ChainSettings &chainSettings);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BassQualizerAudioProcessor)
 };

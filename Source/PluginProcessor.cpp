@@ -254,9 +254,7 @@ void BassQualizerAudioProcessor::updateHighCutFilter(const ChainSettings &chainS
     updateCutFilter(rightHighCut, highCutCoefficientsHigh, chainSettings.highCutSlope);
 }
 
-void BassQualizerAudioProcessor::updateFilters() {
-    auto chainSettings = getChainSettings(apvts);
-
+void BassQualizerAudioProcessor::updateReverbFilter(const ChainSettings &chainSettings) {
     juce::dsp::Reverb::Parameters reverbParams;
     reverbParams.roomSize = chainSettings.reverbRoomSize;
     reverbParams.damping = chainSettings.reverbDamping;
@@ -266,11 +264,17 @@ void BassQualizerAudioProcessor::updateFilters() {
     reverbParams.freezeMode = chainSettings.reverbFreezeMode;
 
     reverb.setParameters(reverbParams);
-    reverb.setEnabled(chainSettings.reverbBypassed);
+    reverb.setEnabled(!chainSettings.reverbBypassed);
+}
+
+
+void BassQualizerAudioProcessor::updateFilters() {
+    auto chainSettings = getChainSettings(apvts);
 
     updatePeakFilter(chainSettings);
     updateLowCutFilter(chainSettings);
     updateHighCutFilter(chainSettings);
+    updateReverbFilter(chainSettings);
 }
 
 
