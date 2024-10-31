@@ -62,7 +62,10 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (Colours::black);
 
-    auto responseArea = getLocalBounds();
+    g.drawImage(background, getLocalBounds().toFloat());
+
+    //auto responseArea = getLocalBounds();
+    auto responseArea = getAnalysisArea();
 
     auto w = responseArea.getWidth();
 
@@ -132,7 +135,28 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
 
+g.drawRect(getRenderArea());
 
+}
+
+
+juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
+{
+    auto bounds = getLocalBounds();
+
+    bounds.removeFromTop(12);
+    bounds.removeFromLeft(20);
+    bounds.removeFromRight(20);
+    bounds.removeFromBottom(2);
+    return bounds;
+}
+
+juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
+{
+    auto bounds = getRenderArea();
+    bounds.removeFromTop(4);
+    bounds.removeFromBottom(4);
+    return bounds;
 }
 
 
