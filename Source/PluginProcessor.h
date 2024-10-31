@@ -18,19 +18,23 @@ enum Slope {
 };
 
 struct ChainSettings {
-    float peakFreq{0}, peakGainInDecibels{0}, peakQuality{1.f};
-    float lowCutFreq{0}, highCutFreq{0};
+    float peakFreq{0},
+            peakGainInDecibels{0},
+            peakQuality{1.f},
+            lowCutFreq{0}, highCutFreq{0},
+            reverbRoomSize{0.5f},
+            reverbDamping{0.5f},
+            reverbWetLevel{0.33f},
+            reverbDryLevel{0.4f},
+            reverbWidth{1.0f};
 
     Slope lowCutSlope{Slope::Slope_12}, highCutSlope{Slope::Slope_12};
 
-    bool lowCutBypassed{false}, peakBypassed{false}, highCutBypassed{false}, reverbBypassed{true};
-    // Reverb parameters
-    float reverbRoomSize{0.5f};
-    float reverbDamping{0.5f};
-    float reverbWetLevel{0.33f};
-    float reverbDryLevel{0.4f};
-    float reverbWidth{1.0f};
-    bool reverbFreezeMode{false};
+    bool lowCutBypassed{false},
+            peakBypassed{false},
+            highCutBypassed{false},
+            reverbBypassed{false},
+            reverbFreezeMode{false};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts);
@@ -43,13 +47,15 @@ using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
 
 
 enum ChainPositions {
-        lowCut,
-        peak,
-        highCut
-    };
+    lowCut,
+    peak,
+    highCut,
+    reverb
+};
 
 
 using Coefficients = Filter::CoefficientsPtr;
+
 void updateCoefficients(Coefficients &old, const Coefficients &replacements);
 
 Coefficients makePeakFilter(const ChainSettings &chainSettings, double sampleRate);
@@ -62,52 +68,51 @@ void updateCutFilter(ChainType &chain, const CoefficientType &cutCoefficients, S
     chain.template setBypassed<2>(true);
     chain.template setBypassed<3>(true);
 
-        switch (cutSlope) {
-            case Slope_12:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                break;
-            case Slope_24:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                break;
-            case Slope_36:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                *chain.template get<2>().coefficients = *cutCoefficients[2];
-                chain.template setBypassed<2>(false);
-                break;
-            case Slope_48:
-                *chain.template get<0>().coefficients = *cutCoefficients[0];
-                chain.template setBypassed<0>(false);
-                *chain.template get<1>().coefficients = *cutCoefficients[1];
-                chain.template setBypassed<1>(false);
-                *chain.template get<2>().coefficients = *cutCoefficients[2];
-                chain.template setBypassed<2>(false);
-                *chain.template get<3>().coefficients = *cutCoefficients[3];
-                chain.template setBypassed<3>(false);
-                break;
-            default: break;
-        }
+    switch (cutSlope) {
+        case Slope_12:
+            *chain.template get<0>().coefficients = *cutCoefficients[0];
+            chain.template setBypassed<0>(false);
+            break;
+        case Slope_24:
+            *chain.template get<0>().coefficients = *cutCoefficients[0];
+            chain.template setBypassed<0>(false);
+            *chain.template get<1>().coefficients = *cutCoefficients[1];
+            chain.template setBypassed<1>(false);
+            break;
+        case Slope_36:
+            *chain.template get<0>().coefficients = *cutCoefficients[0];
+            chain.template setBypassed<0>(false);
+            *chain.template get<1>().coefficients = *cutCoefficients[1];
+            chain.template setBypassed<1>(false);
+            *chain.template get<2>().coefficients = *cutCoefficients[2];
+            chain.template setBypassed<2>(false);
+            break;
+        case Slope_48:
+            *chain.template get<0>().coefficients = *cutCoefficients[0];
+            chain.template setBypassed<0>(false);
+            *chain.template get<1>().coefficients = *cutCoefficients[1];
+            chain.template setBypassed<1>(false);
+            *chain.template get<2>().coefficients = *cutCoefficients[2];
+            chain.template setBypassed<2>(false);
+            *chain.template get<3>().coefficients = *cutCoefficients[3];
+            chain.template setBypassed<3>(false);
+            break;
+        default: break;
+    }
 }
 
-inline auto makeLowCutFilter(const ChainSettings &chainSettings, double sampleRate)
-{
+inline auto makeLowCutFilter(const ChainSettings &chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq,
-                                                                                         sampleRate,
-                                                                                         2 * (chainSettings.lowCutSlope + 1));
+        sampleRate,
+        2 * (chainSettings.lowCutSlope + 1));
 }
 
-inline auto makeHighCutFilter(const ChainSettings &chainSettings, double sampleRate)
-{
+inline auto makeHighCutFilter(const ChainSettings &chainSettings, double sampleRate) {
     return juce::dsp::FilterDesign<float>::designIIRLowpassHighOrderButterworthMethod(chainSettings.highCutFreq,
-                                                                                       sampleRate,
-                                                                                       2 * (chainSettings.highCutSlope + 1));
+        sampleRate,
+        2 * (chainSettings.highCutSlope + 1));
 }
+
 //==============================================================================
 /**
 */
@@ -173,9 +178,13 @@ private:
     void updatePeakFilter(const ChainSettings &chainSettings);
 
     void updateFilters();
+
     void updateLowCutFilter(const ChainSettings &chainSettings);
+
     void updateHighCutFilter(const ChainSettings &chainSettings);
+
     void updateReverbFilter(const ChainSettings &chainSettings);
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BassQualizerAudioProcessor)
 };

@@ -150,13 +150,11 @@ void BassQualizerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
     juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
     juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
 
-    juce::dsp::ProcessContextReplacing<float> context(block);
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
 
     reverb.process(leftContext);
     reverb.process(rightContext);
-
-    leftChain.process(leftContext);
-    rightChain.process(rightContext);
 }
 
 //==============================================================================
@@ -204,6 +202,13 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState &apvts) {
     settings.lowCutBypassed = apvts.getRawParameterValue("lowCutBypass")->load() > 0.5f;
     settings.peakBypassed = apvts.getRawParameterValue("peakBypass")->load() > 0.5f;
     settings.highCutBypassed = apvts.getRawParameterValue("highCutBypass")->load() > 0.5f;
+    settings.reverbRoomSize = apvts.getRawParameterValue("reverbRoomSize")->load();
+    settings.reverbDamping = apvts.getRawParameterValue("reverbDamping")->load();
+    settings.reverbWetLevel = apvts.getRawParameterValue("reverbWetLevel")->load();
+    settings.reverbDryLevel = apvts.getRawParameterValue("reverbDryLevel")->load();
+    settings.reverbWidth = apvts.getRawParameterValue("reverbWidth")->load();
+    settings.reverbBypassed = apvts.getRawParameterValue("reverbBypass")->load() > 0.5f;
+    settings.reverbFreezeMode = apvts.getRawParameterValue("reverbFreezeMode")->load() > 0.5f;
 
     return settings;
 }
@@ -226,7 +231,7 @@ void BassQualizerAudioProcessor::updatePeakFilter(const ChainSettings &chainSett
     updateCoefficients(rightChain.get<ChainPositions::peak>().coefficients, *peakCoefficients);
 }
 
-void /* BassQualizerAudioProcessor*/updateCoefficients(Coefficients &old, const Coefficients &replacements) {
+void updateCoefficients(Coefficients &old, const Coefficients &replacements) {
     *old = *replacements;
 }
 
