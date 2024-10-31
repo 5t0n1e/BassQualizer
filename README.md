@@ -1,4 +1,15 @@
 # Equalizer - C++ - VST
 
-Ons eindgoal zou zijn dat we een geluidsignaal kunnen opsplitsen in x aantal signalen zodat we een soort van crossover hebben waarmee we elke frequentie apart kunnen behandelen. Een mogelijke configuratie zou bv zijn: Bassen 0Hz - 80Hz, Kick 80Hz - 180Hz, MidTop 180Hz - 20000Hz. Vervolgens zouden we nu de controle moeten hebben met iets van cmdline/gui om de frequenties van intensiteit te veranderen of te muten en ook nog bepaalde fx effecten, reverb effecten te kunnen op toepassen zoals: delay, lowcut, pitch, headset, room, plate, chorus. Een eventuele uitbreiding is een noise canceling feature ontwerpen.
+This is a simple equalizer plugin for VST3. It has a couple of filters that can be used to manipulate the audio signal. We also made a visual representation of the filters in the frequency domain and the audio signal the plugin is processing. 
 
+## Lowcut
+The lowcut filter is a highpass filter that removes the low frequencies from the audio signal. The cutoff frequency can be adjusted with the knobs. The slope of the filter can also be adjusted with the knobs.
+
+## Highcut
+The highcut filter is a lowpass filter that removes the high frequencies from the audio signal. The cutoff frequency can be adjusted with the knobs. The slope of the filter can also be adjusted with the knobs.
+
+## Peaking
+The peaking filter is a bandpass filter that boosts or attenuates a certain frequency range. The center frequency, gain and bandwidth can be adjusted with the knobs.
+
+## Reverb
+The reverb filter is a simple reverb effect that can be added to the audio signal. The reverb time and dry/wet mix can be adjusted with the knobs.
