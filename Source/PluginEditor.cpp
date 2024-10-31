@@ -210,6 +210,23 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     addAndMakeVisible(&reverbFreezeModeButton);
     reverbFreezeModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, "reverbFreezeMode", reverbFreezeModeButton);
 
+    // Labels
+    addAndMakeVisible(&lowcutLabel);
+    lowcutLabel.setText("Low Cut Filter", juce::dontSendNotification);
+    lowcutLabel.setJustificationType(juce::Justification::centred);
+
+    addAndMakeVisible(&highcutLabel);
+    highcutLabel.setText("High Cut Filter", juce::dontSendNotification);
+    highcutLabel.setJustificationType(juce::Justification::centred);
+
+    addAndMakeVisible(&peakLabel);
+    peakLabel.setText("Peak Filter", juce::dontSendNotification);
+    peakLabel.setJustificationType(juce::Justification::centred);
+
+    addAndMakeVisible(&reverbLabel);
+    reverbLabel.setText("Reverb", juce::dontSendNotification);
+    reverbLabel.setJustificationType(juce::Justification::centred);
+
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
     }
@@ -242,6 +259,7 @@ void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
+// PluginEditor.cpp
 void BassQualizerAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
@@ -254,14 +272,17 @@ void BassQualizerAudioProcessorEditor::resized()
     auto lowCutArea = rotaryArea.removeFromLeft(rotaryArea.getWidth() * 0.33);
     auto highCutArea = rotaryArea.removeFromRight(rotaryArea.getWidth() * 0.5);
 
+    lowcutLabel.setBounds(lowCutArea.removeFromTop(25));
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
     lowcutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowcutSlopeSlider.setBounds(lowCutArea);
 
+    highcutLabel.setBounds(highCutArea.removeFromTop(25));
     highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
     highcutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highcutSlopeSlider.setBounds(highCutArea);
 
+    peakLabel.setBounds(rotaryArea.removeFromTop(25));
     peakBypassButton.setBounds(rotaryArea.removeFromTop(25));
     peakFreqSlider.setBounds(rotaryArea.removeFromTop(rotaryArea.getHeight() * 0.33));
     peakGainSlider.setBounds(rotaryArea.removeFromTop(rotaryArea.getHeight() * 0.5));
@@ -269,14 +290,16 @@ void BassQualizerAudioProcessorEditor::resized()
 
     auto reverbArea = bounds;
 
+    reverbLabel.setBounds(reverbArea.removeFromTop(25));
+    reverbBypassButton.setBounds(reverbArea.removeFromTop(25));
     reverbRoomSizeSlider.setBounds(reverbArea.removeFromTop(50));
     reverbDampingSlider.setBounds(reverbArea.removeFromTop(50));
     reverbWetLevelSlider.setBounds(reverbArea.removeFromTop(50));
     reverbDryLevelSlider.setBounds(reverbArea.removeFromTop(50));
     reverbWidthSlider.setBounds(reverbArea.removeFromTop(50));
     reverbFreezeModeButton.setBounds(reverbArea.removeFromTop(50));
-    reverbBypassButton.setBounds(reverbArea.removeFromTop(25));
 }
+
 
 
 std::vector<juce::Component*> BassQualizerAudioProcessorEditor::getComps()
