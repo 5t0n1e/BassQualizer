@@ -66,7 +66,12 @@ private:
             lowcutFreqSlider,
             highcutFreqSlider,
             lowcutSlopeSlider,
-            highcutSlopeSlider;
+            highcutSlopeSlider,
+            reverbRoomSizeSlider,
+            reverbDampingSlider,
+            reverbWetLevelSlider,
+            reverbDryLevelSlider,
+            reverbWidthSlider;
 
     ResponseCurveComponent responseCurveComponent;
 
@@ -79,40 +84,33 @@ private:
             lowcutFreqSliderAttachment,
             highcutFreqSliderAttachment,
             lowcutSlopeSliderAttachment,
-            highcutSlopeSliderAttachment;
+            highcutSlopeSliderAttachment,
+            reverbRoomSizeAttachment,
+            reverbDampingAttachment,
+            reverbWetLevelAttachment,
+            reverbDryLevelAttachment,
+            reverbWidthAttachment;
 
-    juce::ToggleButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    juce::ToggleButton lowcutBypassButton, peakBypassButton, highcutBypassButton, reverbBypassButton,
+            reverbFreezeModeButton;
 
     using ButtonAttachment = APVTS::ButtonAttachment;
 
-    ButtonAttachment lowcutBypassButtonAttachment, peakBypassButtonAttachment, highcutBypassButtonAttachment;
+    ButtonAttachment lowcutBypassButtonAttachment,
+            peakBypassButtonAttachment,
+            highcutBypassButtonAttachment,
+            reverbBypassButtonAttachment;;
 
-    // Reverb sliders
-    juce::Slider reverbRoomSizeSlider;
-    juce::Slider reverbDampingSlider;
-    juce::Slider reverbWetLevelSlider;
-    juce::Slider reverbDryLevelSlider;
-    juce::Slider reverbWidthSlider;
-    juce::ToggleButton reverbFreezeModeButton;
-
-    // Attachments
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbRoomSizeAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDampingAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWetLevelAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbDryLevelAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> reverbWidthAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> reverbFreezeModeAttachment;
-
-    juce::ToggleButton reverbBypassButton;
-    ButtonAttachment reverbBypassButtonAttachment;
-
-    myLookAndFeelV1 lookAndFeelV1; // Create instances of your custom look and feel classes
+    // Custom look and feel
+    myLookAndFeelV1 lookAndFeelV1;
     myLookAndFeelV3 lookAndFeelV3;
 
-    juce::Label lowcutLabel;
-    juce::Label highcutLabel;
-    juce::Label peakLabel;
-    juce::Label reverbLabel;
+    // Labels
+    using Label = juce::Label;
+    Label lowcutLabel,
+            highcutLabel,
+            peakLabel,
+            reverbLabel;
 
     std::vector<juce::Component *> getComps();
 

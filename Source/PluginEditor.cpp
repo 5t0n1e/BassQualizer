@@ -159,6 +159,11 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     lowcutBypassButtonAttachment(audioProcessor.apvts, "lowCutBypass", lowcutBypassButton),
     peakBypassButtonAttachment(audioProcessor.apvts, "peakBypass", peakBypassButton),
     highcutBypassButtonAttachment(audioProcessor.apvts, "highCutBypass", highcutBypassButton),
+    reverbRoomSizeAttachment(audioProcessor.apvts, "reverbRoomSize", reverbRoomSizeSlider),
+    reverbDampingAttachment(audioProcessor.apvts, "reverbDamping", reverbDampingSlider),
+    reverbWidthAttachment(audioProcessor.apvts, "reverbWidth", reverbWidthSlider),
+    reverbDryLevelAttachment(audioProcessor.apvts, "reverbDryLevel", reverbDryLevelSlider),
+    reverbWetLevelAttachment(audioProcessor.apvts, "reverbWetLevel", reverbWetLevelSlider),
     reverbBypassButtonAttachment(audioProcessor.apvts, "reverbBypass", reverbBypassButton)
 
 {
@@ -169,46 +174,17 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     highcutFreqSlider.setLookAndFeel(&lookAndFeelV1);
     lowcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
     highcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
+    reverbRoomSizeSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbDampingSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbWetLevelSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbDryLevelSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbWidthSlider.setLookAndFeel(&lookAndFeelV1);
+
 
     lowcutBypassButton.setLookAndFeel(&lookAndFeelV1);
     peakBypassButton.setLookAndFeel(&lookAndFeelV1);
     highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
-
     reverbBypassButton.setLookAndFeel(&lookAndFeelV1);
-
-        // Reverb Room Size
-    reverbRoomSizeSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    reverbRoomSizeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    addAndMakeVisible(&reverbRoomSizeSlider);
-    reverbRoomSizeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverbRoomSize", reverbRoomSizeSlider);
-
-    // Reverb Damping
-    reverbDampingSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    reverbDampingSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    addAndMakeVisible(&reverbDampingSlider);
-    reverbDampingAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverbDamping", reverbDampingSlider);
-
-    // Reverb Wet Level
-    reverbWetLevelSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    reverbWetLevelSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    addAndMakeVisible(&reverbWetLevelSlider);
-    reverbWetLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverbWetLevel", reverbWetLevelSlider);
-
-    // Reverb Dry Level
-    reverbDryLevelSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    reverbDryLevelSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    addAndMakeVisible(&reverbDryLevelSlider);
-    reverbDryLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverbDryLevel", reverbDryLevelSlider);
-
-    // Reverb Width
-    reverbWidthSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    reverbWidthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 20);
-    addAndMakeVisible(&reverbWidthSlider);
-    reverbWidthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "reverbWidth", reverbWidthSlider);
-
-    // Reverb Freeze Mode
-    addAndMakeVisible(&reverbFreezeModeButton);
-    reverbFreezeModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.apvts, "reverbFreezeMode", reverbFreezeModeButton);
 
     // Labels
     addAndMakeVisible(&lowcutLabel);
@@ -243,11 +219,15 @@ BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
     highcutFreqSlider.setLookAndFeel(nullptr);
     lowcutSlopeSlider.setLookAndFeel(nullptr);
     highcutSlopeSlider.setLookAndFeel(nullptr);
+    reverbRoomSizeSlider.setLookAndFeel(nullptr);
+    reverbDampingSlider.setLookAndFeel(nullptr);
+    reverbWetLevelSlider.setLookAndFeel(nullptr);
+    reverbDryLevelSlider.setLookAndFeel(nullptr);
+    reverbWidthSlider.setLookAndFeel(nullptr);
 
     lowcutBypassButton.setLookAndFeel(nullptr);
     peakBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
-
     reverbBypassButton.setLookAndFeel(nullptr);
 }
 
@@ -267,10 +247,10 @@ void BassQualizerAudioProcessorEditor::resized()
 
     responseCurveComponent.setBounds(responseArea);
 
-    auto rotaryArea = bounds.removeFromTop(bounds.getHeight() * 0.5);
+    auto topArea = bounds.removeFromTop(bounds.getHeight() * 0.5);
 
-    auto lowCutArea = rotaryArea.removeFromLeft(rotaryArea.getWidth() * 0.33);
-    auto highCutArea = rotaryArea.removeFromRight(rotaryArea.getWidth() * 0.5);
+    auto lowCutArea = topArea.removeFromLeft(topArea.getWidth() * 0.33);
+    auto highCutArea = topArea.removeFromRight(topArea.getWidth() * 0.5);
 
     lowcutLabel.setBounds(lowCutArea.removeFromTop(25));
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
@@ -282,22 +262,40 @@ void BassQualizerAudioProcessorEditor::resized()
     highcutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highcutSlopeSlider.setBounds(highCutArea);
 
-    peakLabel.setBounds(rotaryArea.removeFromTop(25));
-    peakBypassButton.setBounds(rotaryArea.removeFromTop(25));
-    peakFreqSlider.setBounds(rotaryArea.removeFromTop(rotaryArea.getHeight() * 0.33));
-    peakGainSlider.setBounds(rotaryArea.removeFromTop(rotaryArea.getHeight() * 0.5));
-    peakqualitySlider.setBounds(rotaryArea);
+    peakLabel.setBounds(topArea.removeFromTop(25));
+    peakBypassButton.setBounds(topArea.removeFromTop(25));
+    peakFreqSlider.setBounds(topArea.removeFromTop(topArea.getHeight() * 0.33));
+    peakGainSlider.setBounds(topArea.removeFromTop(topArea.getHeight() * 0.5));
+    peakqualitySlider.setBounds(topArea);
 
-    auto reverbArea = bounds;
+    auto bottomArea = bounds;
+    bottomArea.removeFromTop(50);
 
-    reverbLabel.setBounds(reverbArea.removeFromTop(25));
-    reverbBypassButton.setBounds(reverbArea.removeFromTop(25));
-    reverbRoomSizeSlider.setBounds(reverbArea.removeFromTop(50));
-    reverbDampingSlider.setBounds(reverbArea.removeFromTop(50));
-    reverbWetLevelSlider.setBounds(reverbArea.removeFromTop(50));
-    reverbDryLevelSlider.setBounds(reverbArea.removeFromTop(50));
-    reverbWidthSlider.setBounds(reverbArea.removeFromTop(50));
-    reverbFreezeModeButton.setBounds(reverbArea.removeFromTop(50));
+    reverbLabel.setBounds(bottomArea.removeFromTop(25));
+    reverbBypassButton.setBounds(bottomArea.removeFromTop(25));
+
+    auto borderSpacing = 100;
+    bottomArea.reduce(borderSpacing, 0);
+
+    // Calculate the total width of all sliders and the spacing
+    int numSliders = 5;
+    int totalSpacing = borderSpacing * 2;
+    int totalWidth = bottomArea.getWidth() - totalSpacing;
+    auto reverbSliderWidth = totalWidth / numSliders;
+    auto reverbSliderHeight = 150;
+
+    // Calculate the starting X position to center the sliders
+    int startX = (bottomArea.getWidth() - totalWidth) / 2;
+
+    // Adjust the bottomArea to start from the calculated X position
+    bottomArea = bottomArea.withTrimmedLeft(startX).withTrimmedRight(startX);
+
+    reverbRoomSizeSlider.setBounds(bottomArea.removeFromLeft(reverbSliderWidth).removeFromTop(reverbSliderHeight));
+    reverbDampingSlider.setBounds(bottomArea.removeFromLeft(reverbSliderWidth).removeFromTop(reverbSliderHeight));
+    reverbWetLevelSlider.setBounds(bottomArea.removeFromLeft(reverbSliderWidth).removeFromTop(reverbSliderHeight));
+    reverbDryLevelSlider.setBounds(bottomArea.removeFromLeft(reverbSliderWidth).removeFromTop(reverbSliderHeight));
+    reverbWidthSlider.setBounds(bottomArea.removeFromLeft(reverbSliderWidth).removeFromTop(reverbSliderHeight));
+    reverbFreezeModeButton.setBounds(bottomArea);
 }
 
 
@@ -313,7 +311,14 @@ std::vector<juce::Component*> BassQualizerAudioProcessorEditor::getComps()
         &highcutFreqSlider,
         &lowcutSlopeSlider,
         &highcutSlopeSlider,
+        &reverbRoomSizeSlider,
+        &reverbDampingSlider,
+        &reverbWetLevelSlider,
+        &reverbDryLevelSlider,
+        &reverbWidthSlider,
+
         &responseCurveComponent,
+
         &lowcutBypassButton,
         &peakBypassButton,
         &highcutBypassButton,
