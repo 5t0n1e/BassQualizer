@@ -75,11 +75,11 @@ void ResponseCurveComponent::timerCallback()
         }
     }
 
- /* while (pathProducer.getNumPathsAvailable())
+    while (pathProducer.getNumPathsAvailable())
     {
         pathProducer.getPath(leftChannelFFTPath);
     }
-    */
+    
 
 
     if(parametersChanged.compareAndSetBool(false, true))
@@ -96,11 +96,11 @@ void ResponseCurveComponent::timerCallback()
         updateCutFilter(monoChain.get<ChainPositions::lowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
         updateCutFilter(monoChain.get<ChainPositions::highCut>(), highCutCoefficients, chainSettings.highCutSlope);
         // signal a repaint
-        repaint();
+        //repaint();
         
     }
 
-   // repaint();
+    repaint();
 }
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
@@ -175,6 +175,9 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     for (size_t i = 1; i < mags.size(); ++i){
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
     }
+
+    g.setColour(Colours::blue);
+    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
