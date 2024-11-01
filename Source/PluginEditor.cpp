@@ -9,13 +9,16 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-ResponseCurveComponent::ResponseCurveComponent(BassQualizerAudioProcessor& p) : audioProcessor(p)
+ResponseCurveComponent::ResponseCurveComponent(BassQualizerAudioProcessor& p) : audioProcessor(p), leftChannelFifo(&p.leftChannelFifo)
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param : params)
     {
         param->addListener(this);
     }
+
+    leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+    monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 
     startTimerHz(60);
 }
@@ -37,6 +40,48 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 
 void ResponseCurveComponent::timerCallback()
 {
+
+    juce::AudioBuffer<float> tempIncomingBuffer;
+
+    while( leftChannelFifo->getNumCompleteBuffersAvailable() > 0 )
+    {
+        if( leftChannelFifo->getAudioBuffer(tempIncomingBuffer) )
+        {
+            auto size = tempIncomingBuffer.getNumSamples();
+
+            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
+                                              monoBuffer.getReadPointer(0, size),
+                                              monoBuffer.getNumSamples() - size);
+
+            juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+                                              tempIncomingBuffer.getReadPointer(0, 0),
+                                              size);
+
+            leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
+        }
+    }
+
+    const auto fftBounds = getAnalysisArea().toFloat();
+    const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+
+    const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+
+    while( leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0 )
+    {
+        std::vector<float> fftData;
+        if( leftChannelFFTDataGenerator.getFFTData(fftData) )
+        {
+            pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+        }
+    }
+
+    while (pathProducer.getNumPathsAvailable())
+    {
+        pathProducer.getPath(leftChannelFFTPath);
+    }
+
+
+
     if(parametersChanged.compareAndSetBool(false, true))
     {
         DBG("Params changed");
@@ -56,9 +101,11 @@ void ResponseCurveComponent::timerCallback()
         updateCutFilter(monoChain.get<ChainPositions::lowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
         updateCutFilter(monoChain.get<ChainPositions::highCut>(), highCutCoefficients, chainSettings.highCutSlope);
         // signal a repaint
-        repaint();
+        //repaint();
 
     }
+
+    repaint();
 }
 
 void ResponseCurveComponent::paint (juce::Graphics& g)
@@ -67,7 +114,10 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (Colours::black);
 
-    auto responseArea = getLocalBounds();
+    g.drawImage(background, getLocalBounds().toFloat());
+
+    //auto responseArea = getLocalBounds();
+    auto responseArea = getAnalysisArea();
 
     auto w = responseArea.getWidth();
 
@@ -119,7 +169,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 
         mags[i] = Decibels::gainToDecibels(mag);
     }
-
+    
     Path responseCurve;
 
     const double outputMin = responseArea.getBottom();
@@ -135,13 +185,39 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
     }
 
+
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+    g.setColour(Colours::blue);
+    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
 
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
 
+g.drawRect(getRenderArea());
 
+}
+
+
+juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
+{
+    auto bounds = getLocalBounds();
+
+    bounds.removeFromTop(12);
+    bounds.removeFromLeft(20);
+    bounds.removeFromRight(20);
+    bounds.removeFromBottom(2);
+    return bounds;
+}
+
+juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
+{
+    auto bounds = getRenderArea();
+    bounds.removeFromTop(4);
+    bounds.removeFromBottom(4);
+    return bounds;
 }
 
 
@@ -174,34 +250,6 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     highcutFreqSlider.setLookAndFeel(&lookAndFeelV1);
     lowcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
     highcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
-    reverbRoomSizeSlider.setLookAndFeel(&lookAndFeelV1);
-    reverbDampingSlider.setLookAndFeel(&lookAndFeelV1);
-    reverbWetLevelSlider.setLookAndFeel(&lookAndFeelV1);
-    reverbDryLevelSlider.setLookAndFeel(&lookAndFeelV1);
-    reverbWidthSlider.setLookAndFeel(&lookAndFeelV1);
-
-
-    lowcutBypassButton.setLookAndFeel(&lookAndFeelV1);
-    peakBypassButton.setLookAndFeel(&lookAndFeelV1);
-    highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
-    reverbBypassButton.setLookAndFeel(&lookAndFeelV1);
-
-    // Labels
-    addAndMakeVisible(&lowcutLabel);
-    lowcutLabel.setText("Low Cut Filter", juce::dontSendNotification);
-    lowcutLabel.setJustificationType(juce::Justification::centred);
-
-    addAndMakeVisible(&highcutLabel);
-    highcutLabel.setText("High Cut Filter", juce::dontSendNotification);
-    highcutLabel.setJustificationType(juce::Justification::centred);
-
-    addAndMakeVisible(&peakLabel);
-    peakLabel.setText("Peak Filter", juce::dontSendNotification);
-    peakLabel.setJustificationType(juce::Justification::centred);
-
-    addAndMakeVisible(&reverbLabel);
-    reverbLabel.setText("Reverb", juce::dontSendNotification);
-    reverbLabel.setJustificationType(juce::Justification::centred);
 
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
@@ -236,12 +284,13 @@ void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
 {
     using namespace juce;
     g.fillAll (juce::Colours::black);
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
-// PluginEditor.cpp
 void BassQualizerAudioProcessorEditor::resized()
 {
+    // This is generally where you'll want to lay out the positions of any
+    // subcomponents in your editor..
+
     auto bounds = getLocalBounds();
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
 
@@ -299,10 +348,9 @@ void BassQualizerAudioProcessorEditor::resized()
 }
 
 
-
 std::vector<juce::Component*> BassQualizerAudioProcessorEditor::getComps()
 {
-    return
+    return 
     {
         &peakFreqSlider,
         &peakGainSlider,

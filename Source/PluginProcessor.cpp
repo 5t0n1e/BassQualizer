@@ -94,6 +94,16 @@ void BassQualizerAudioProcessor::prepareToPlay(double sampleRate, int samplesPer
     rightChain.prepare(spec);
 
     updateFilters();
+
+    leftChannelFifo.prepare(samplesPerBlock);
+    rightChannelFifo.prepare(samplesPerBlock);
+
+    osc.initialise([](float x) { return std::sin(x); });
+
+    spec.numChannels = getTotalNumOutputChannels();
+    osc.prepare(spec);
+    osc.setFrequency(200);
+
 }
 
 void BassQualizerAudioProcessor::releaseResources() {
@@ -155,6 +165,9 @@ void BassQualizerAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
 
     reverb.process(leftContext);
     reverb.process(rightContext);
+
+    leftChannelFifo.update(buffer);
+    rightChannelFifo.update(buffer);
 }
 
 //==============================================================================
