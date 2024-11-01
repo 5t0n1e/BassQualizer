@@ -250,6 +250,16 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     highcutFreqSlider.setLookAndFeel(&lookAndFeelV1);
     lowcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
     highcutSlopeSlider.setLookAndFeel(&lookAndFeelV3);
+    reverbRoomSizeSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbDampingSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbWetLevelSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbDryLevelSlider.setLookAndFeel(&lookAndFeelV1);
+    reverbWidthSlider.setLookAndFeel(&lookAndFeelV1);
+
+    lowcutBypassButton.setLookAndFeel(&lookAndFeelV1);
+    peakBypassButton.setLookAndFeel(&lookAndFeelV1);
+    highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
+    reverbBypassButton.setLookAndFeel(&lookAndFeelV1);
 
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
