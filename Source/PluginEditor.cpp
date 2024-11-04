@@ -261,6 +261,18 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
     highcutBypassButton.setLookAndFeel(&lookAndFeelV1);
     reverbBypassButton.setLookAndFeel(&lookAndFeelV1);
 
+    // Initialize labels
+    lowcutLabel.setText("Low Cut", juce::dontSendNotification);
+    highcutLabel.setText("High Cut", juce::dontSendNotification);
+    peakLabel.setText("Peak", juce::dontSendNotification);
+    reverbLabel.setText("Reverb", juce::dontSendNotification);
+
+    // Add labels to the editor
+    addAndMakeVisible(lowcutLabel);
+    addAndMakeVisible(highcutLabel);
+    addAndMakeVisible(peakLabel);
+    addAndMakeVisible(reverbLabel);
+
     for( auto* comp : getComps()){
         addAndMakeVisible(comp);
     }
@@ -298,9 +310,6 @@ void BassQualizerAudioProcessorEditor::paint (juce::Graphics& g)
 
 void BassQualizerAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-
     auto bounds = getLocalBounds();
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
 
@@ -310,6 +319,7 @@ void BassQualizerAudioProcessorEditor::resized()
 
     auto lowCutArea = topArea.removeFromLeft(topArea.getWidth() * 0.33);
     auto highCutArea = topArea.removeFromRight(topArea.getWidth() * 0.5);
+    auto peakArea = topArea;
 
     lowcutLabel.setBounds(lowCutArea.removeFromTop(25));
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
@@ -321,11 +331,11 @@ void BassQualizerAudioProcessorEditor::resized()
     highcutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highcutSlopeSlider.setBounds(highCutArea);
 
-    peakLabel.setBounds(topArea.removeFromTop(25));
-    peakBypassButton.setBounds(topArea.removeFromTop(25));
-    peakFreqSlider.setBounds(topArea.removeFromTop(topArea.getHeight() * 0.33));
-    peakGainSlider.setBounds(topArea.removeFromTop(topArea.getHeight() * 0.5));
-    peakqualitySlider.setBounds(topArea);
+    peakLabel.setBounds(peakArea.removeFromTop(25));
+    peakBypassButton.setBounds(peakArea.removeFromTop(25));
+    peakFreqSlider.setBounds(peakArea.removeFromTop(peakArea.getHeight() * 0.33));
+    peakGainSlider.setBounds(peakArea.removeFromTop(peakArea.getHeight() * 0.5));
+    peakqualitySlider.setBounds(peakArea);
 
     auto bottomArea = bounds;
     bottomArea.removeFromTop(50);
