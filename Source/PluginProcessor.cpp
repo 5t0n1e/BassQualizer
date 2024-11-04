@@ -282,7 +282,7 @@ void BassQualizerAudioProcessor::updateReverbFilter(const ChainSettings &chainSe
     reverbParams.freezeMode = chainSettings.reverbFreezeMode;
 
     reverb.setParameters(reverbParams);
-    reverb.setEnabled(chainSettings.reverbBypassed);
+    reverb.setEnabled(!chainSettings.reverbBypassed);
 }
 
 
