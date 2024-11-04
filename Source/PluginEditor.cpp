@@ -277,7 +277,7 @@ BassQualizerAudioProcessorEditor::BassQualizerAudioProcessorEditor (BassQualizer
         addAndMakeVisible(comp);
     }
 
-    setSize (1920, 1080);
+    setSize (1200, 800);
 }
 
 BassQualizerAudioProcessorEditor::~BassQualizerAudioProcessorEditor()
@@ -322,16 +322,19 @@ void BassQualizerAudioProcessorEditor::resized()
     auto peakArea = topArea;
 
     lowcutLabel.setBounds(lowCutArea.removeFromTop(25));
+    lowcutLabel.setJustificationType(juce::Justification::centred);
     lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
     lowcutFreqSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowcutSlopeSlider.setBounds(lowCutArea);
 
     highcutLabel.setBounds(highCutArea.removeFromTop(25));
+    highcutLabel.setJustificationType(juce::Justification::centred);
     highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
     highcutFreqSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highcutSlopeSlider.setBounds(highCutArea);
 
     peakLabel.setBounds(peakArea.removeFromTop(25));
+    peakLabel.setJustificationType(juce::Justification::centred);
     peakBypassButton.setBounds(peakArea.removeFromTop(25));
     peakFreqSlider.setBounds(peakArea.removeFromTop(peakArea.getHeight() * 0.33));
     peakGainSlider.setBounds(peakArea.removeFromTop(peakArea.getHeight() * 0.5));
@@ -341,6 +344,7 @@ void BassQualizerAudioProcessorEditor::resized()
     bottomArea.removeFromTop(50);
 
     reverbLabel.setBounds(bottomArea.removeFromTop(25));
+    reverbLabel.setJustificationType(juce::Justification::centred);
     reverbBypassButton.setBounds(bottomArea.removeFromTop(25));
 
     auto borderSpacing = 100;
@@ -351,7 +355,7 @@ void BassQualizerAudioProcessorEditor::resized()
     int totalSpacing = borderSpacing * 2;
     int totalWidth = bottomArea.getWidth() - totalSpacing;
     auto reverbSliderWidth = totalWidth / numSliders;
-    auto reverbSliderHeight = 150;
+    auto reverbSliderHeight = 120;
 
     // Calculate the starting X position to center the sliders
     int startX = (bottomArea.getWidth() - totalWidth) / 2;
